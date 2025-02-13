@@ -19,6 +19,8 @@ public class GraphProperties {
     public Vector<VertexPair> vpList;
 
     public Set<Vertex> cutpoints;
+    public Set<Edge> bridges = new HashSet<>();
+
 
     public int[][] generateAdjacencyMatrix(Vector<Vertex> vList, Vector<Edge> eList) {
         adjacencyMatrix = new int[vList.size()][vList.size()];
@@ -99,6 +101,73 @@ public class GraphProperties {
         }
     }
 
+
+    public Set<Edge> identifyBridges(Vector<Vertex> vList, Vector<Edge> eList) {
+        bridges = new HashSet<>();
+        int[] discoveryTime = new int[vList.size()];
+        int[] low = new int[vList.size()];
+        boolean[] visited = new boolean[vList.size()];
+        int[] parent = new int[vList.size()];
+        int time = 0;
+    
+        // Initialize
+        for (int i = 0; i < vList.size(); i++) {
+            parent[i] = -1;
+            visited[i] = false;
+        }
+    
+        for (int i = 0; i < vList.size(); i++) {
+            if (!visited[i]) {
+                dfsForBridges(vList, eList, i, visited, discoveryTime, low, parent, time);
+            }
+        }
+        System.out.println("Bridges detected: " + bridges);
+
+        return bridges;
+    }
+
+    public String printBridges() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Bridges : [");
+        for (Edge e : bridges) {
+            sb.append("(").append(e.vertex1.name).append("-").append(e.vertex2.name).append("), ");
+        }
+        if (!bridges.isEmpty()) {
+            sb.setLength(sb.length() - 2);
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+    
+
+    private void dfsForBridges(Vector<Vertex> vList, Vector<Edge> eList, int u, boolean[] visited, int[] discoveryTime, int[] low, int[] parent, int time) {
+        visited[u] = true;
+        discoveryTime[u] = low[u] = ++time;
+
+        for (Vertex v : vList.get(u).connectedVertices) {
+            int vIndex = vList.indexOf(v);
+            if (!visited[vIndex]) {
+                parent[vIndex] = u;
+                dfsForBridges(vList, eList, vIndex, visited, discoveryTime, low, parent, time);
+
+                low[u] = Math.min(low[u], low[vIndex]);
+
+                // If the edge (u, v) is a bridge
+                if (low[vIndex] > discoveryTime[u]) {
+                    for (Edge edge : eList) {
+                        if ((edge.vertex1 == vList.get(u) && edge.vertex2 == vList.get(vIndex)) ||
+                            (edge.vertex1 == vList.get(vIndex) && edge.vertex2 == vList.get(u))) {
+                            bridges.add(edge);
+                        }
+                    }
+                }
+            } else if (vIndex != parent[u]) {
+                low[u] = Math.min(low[u], discoveryTime[vIndex]);
+            }
+        }
+    }
+
+
     public int[][] generateDistanceMatrix(Vector<Vertex> vList) {
         distanceMatrix = new int[vList.size()][vList.size()];
 
@@ -149,7 +218,7 @@ public class GraphProperties {
 
                     for (int j = 0; j < vp.VertexDisjointContainer.get(i).size(); j++) //for every path in the container
                     {
-                        System.out.print("\t\tPath " + j + "\n\t\t\t");
+                        System.out.println("\t\tPath " + j + "\n\t\t\t");
                         for (int k = 0; k < vp.VertexDisjointContainer.get(i).get(j).size(); k++) {
                             System.out.print("-" + vp.VertexDisjointContainer.get(i).get(j).get(k).name);
                         }
