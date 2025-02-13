@@ -13,6 +13,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
+import java.util.Set;
 import java.util.Vector;
 
 public class Canvas {
@@ -337,7 +338,11 @@ public class Canvas {
 
                     //VD paths
                     gP.displayContainers(vertexList);
-                //gP.drawNWideDiameter();
+
+                    // cutpoints
+                    gP.identifyCutpoints(vertexList);
+
+                    //gP.drawNWideDiameter();
                 }
                 erase();
             }
@@ -453,6 +458,7 @@ public class Canvas {
                     g.drawImage(canvasImage2, 0, 0, null); //layer 1
                     drawString("Graph disconnects when nodes in color red are removed.", 100, height - 30, 20);
                     g.drawString("See output console for Diameter of Graph", 100, height / 2 + 50);
+                    g.drawString(gP.printCutpoints(canvasImage2.getGraphics()), 100, height / 2 + 30);
                     g.drawImage(canvasImage.getScaledInstance(width / 2, height / 2, Image.SCALE_SMOOTH), 0, 0, null); //layer 1
                     g.draw3DRect(0, 0, width / 2, height / 2, true);
                     g.setColor(Color.black);

@@ -6,9 +6,7 @@ package graphtheory;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Vector;
+import java.util.*;
 
 /**
  *
@@ -19,6 +17,8 @@ public class GraphProperties {
     public int[][] adjacencyMatrix;
     public int[][] distanceMatrix;
     public Vector<VertexPair> vpList;
+
+    public Set<Vertex> cutpoints;
 
     public int[][] generateAdjacencyMatrix(Vector<Vertex> vList, Vector<Edge> eList) {
         adjacencyMatrix = new int[vList.size()][vList.size()];
@@ -35,6 +35,68 @@ public class GraphProperties {
             adjacencyMatrix[vList.indexOf(eList.get(i).vertex2)][vList.indexOf(eList.get(i).vertex1)] = 1;
         }
         return adjacencyMatrix;
+    }
+
+    public Set<Vertex> identifyCutpoints(Vector<Vertex> vList) {
+        cutpoints = new HashSet<>();
+        int[] discoveryTime = new int[vList.size()];
+        int[] low = new int[vList.size()];
+        boolean[] visited = new boolean[vList.size()];
+        int[] parent = new int[vList.size()];
+        int time = 0;
+
+        // initialize
+        for (int i = 0; i < vList.size(); i++) {
+            parent[i] = -1;
+            visited[i] = false;
+        }
+
+        for (int i = 0; i < vList.size(); i++) {
+            if (!visited[i]) {
+                dfs(vList, i, visited, discoveryTime, low, parent, cutpoints, time);
+            }
+        }
+
+        return cutpoints;
+    }
+
+    public String printCutpoints(Graphics g) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Cutpoints : [");
+        for (Vertex v : cutpoints) {
+            sb.append(v.name).append(", ");
+        }
+        if (!cutpoints.isEmpty()) {
+            sb.setLength(sb.length() - 2);
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+    private void dfs(Vector<Vertex> vList, int u, boolean[] visited, int[] discoveryTime, int[] low, int[] parent, Set<Vertex> cutpoints, int time) {
+        int children = 0;
+        visited[u] = true;
+        discoveryTime[u] = low[u] = ++time;
+
+        for (Vertex v : vList.get(u).connectedVertices) {
+            int vIndex = vList.indexOf(v);
+            if (!visited[vIndex]) {
+                children++;
+                parent[vIndex] = u;
+                dfs(vList, vIndex, visited, discoveryTime, low, parent, cutpoints, time);
+
+                low[u] = Math.min(low[u], low[vIndex]);
+
+                if (parent[u] == -1 && children > 1) {
+                    cutpoints.add(vList.get(u));
+                }
+
+                if (parent[u] != -1 && low[vIndex] >= discoveryTime[u]) {
+                    cutpoints.add(vList.get(u));
+                }
+            } else if (vIndex != parent[u]) {
+                low[u] = Math.min(low[u], discoveryTime[vIndex]);
+            }
+        }
     }
 
     public int[][] generateDistanceMatrix(Vector<Vertex> vList) {
