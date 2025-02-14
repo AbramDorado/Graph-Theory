@@ -11,8 +11,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
+import java.util.Set;
 import java.util.Vector;
 
 public class Canvas {
@@ -349,12 +349,21 @@ public class Canvas {
 
                     //VD paths
                     gP.displayContainers(vertexList);
+
+
+                    // cutpoints
+                    gP.identifyCutpoints(vertexList);
+                    //bridges
+                    gP.identifyBridges(vertexList, edgeList);
+
+                    //refresh only if the graph isnt empty
+                    refresh();
                     //gP.drawNWideDiameter();
                 }
                 erase();
+                refresh();
             }
-
-            refresh();
+            
         }
     }
 
@@ -401,7 +410,7 @@ public class Canvas {
 
     public void refresh() {
         for (Edge e : edgeList) {
-            e.draw(graphic);
+            e.draw(graphic, gP.bridges.contains(e));
         }
         for (Vertex v : vertexList) {
             v.draw(graphic);
@@ -464,7 +473,10 @@ public class Canvas {
                     gP.drawDistanceMatrix(canvasImage2.getGraphics(), vertexList, width / 2 + 50, height / 2 + 50);//draw distance matrix
                     g.drawImage(canvasImage2, 0, 0, null); //layer 1
                     drawString("Graph disconnects when nodes in color red are removed.", 100, height - 30, 20);
-                    g.drawString("See output console for Diameter of Graph", 100, height / 2 + 50);
+                    drawString("Edges in red are bridges (removing them will split the graph).", 100, height - 10, 20);
+                    g.drawString("See output console for Diameter of Graph", 100, height / 2 + 60);
+                    g.drawString(gP.printCutpoints(canvasImage2.getGraphics()), 100, height / 2 + 30);
+                    g.drawString(gP.printBridges(), 100, height / 2 + 45);
                     g.drawImage(canvasImage.getScaledInstance(width / 2, height / 2, Image.SCALE_SMOOTH), 0, 0, null); //layer 1
                     g.draw3DRect(0, 0, width / 2, height / 2, true);
                     g.setColor(Color.black);

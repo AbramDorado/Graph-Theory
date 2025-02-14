@@ -6,6 +6,8 @@ package graphtheory;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+
 
 /**
  *
@@ -25,13 +27,18 @@ public class Edge {
         this.weight = weight;
     }
 
-    public void draw(Graphics g) {
+    public void draw(Graphics2D g, boolean isBridge) {
         if (wasClicked) {
             g.setColor(Color.red);
         } else if (wasFocused) {
             g.setColor(Color.blue);
         } else {
             g.setColor(Color.black);
+        }
+        if (isBridge) {
+            g.setColor(Color.RED); // Highlight bridges
+        } else {
+            g.setColor(Color.BLACK); // Default edge color
         }
         g.drawLine(vertex1.location.x, vertex1.location.y, vertex2.location.x, vertex2.location.y);
         int midX = (vertex1.location.x + vertex2.location.x) / 2;
@@ -74,4 +81,10 @@ public class Edge {
         return false;
 
     }
+    
+    @Override
+    public String toString() {
+        return "(" + vertex1.name + "-" + vertex2.name + ")";
+    }
+
 }
