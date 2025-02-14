@@ -17,10 +17,12 @@ public class Edge {
     public Vertex vertex2;
     public boolean wasFocused;
     public boolean wasClicked;
+    int weight;
 
-    public Edge(Vertex v1, Vertex v2) {
+    public Edge(Vertex v1, Vertex v2, int weight) {
         vertex1 = v1;
         vertex2 = v2;
+        this.weight = weight;
     }
 
     public void draw(Graphics g) {
@@ -32,7 +34,11 @@ public class Edge {
             g.setColor(Color.black);
         }
         g.drawLine(vertex1.location.x, vertex1.location.y, vertex2.location.x, vertex2.location.y);
+        int midX = (vertex1.location.x + vertex2.location.x) / 2;
+        int midY = (vertex1.location.y + vertex2.location.y) / 2;
 
+        g.setColor(Color.black);  // Ensure the text is always visible
+        g.drawString(String.valueOf(weight), midX, midY);
     }
 
     public boolean hasIntersection(int x, int y) {

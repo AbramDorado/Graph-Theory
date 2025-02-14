@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="GraphTheory">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/-Graph-Theory-v0.5/GraphTheory/dist/GraphTheory.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -9,6 +9,7 @@ import java.awt.Graphics;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Vector;
+import java.util.*;
 
 /**
  *
@@ -19,6 +20,7 @@ public class GraphProperties {
     public int[][] adjacencyMatrix;
     public int[][] distanceMatrix;
     public Vector<VertexPair> vpList;
+    private int time = 0;
 
     public int[][] generateAdjacencyMatrix(Vector<Vertex> vList, Vector<Edge> eList) {
         adjacencyMatrix = new int[vList.size()][vList.size()];
@@ -194,7 +196,7 @@ public class GraphProperties {
         return toBeRemoved;
     }
 
-    private boolean graphConnectivity(Vector<Vertex> vList) {
+    private boolean graphConnectivity(Vector<Vertex> vList) { //Vertex connectivity
 
         Vector<Vertex> visitedList = new Vector<Vertex>();
 
@@ -255,6 +257,54 @@ public class GraphProperties {
                 return 1;
             } else {
                 return 0;
+            }
+        }
+    }
+
+    public void findBridges(List<Vertex> vertices, VertexPair vertexPair) {
+        Map<Vertex, Integer> discoveryTime = new HashMap<>();
+        Map<Vertex, Integer> low = new HashMap<>();
+        Map<Vertex, Vertex> parent = new HashMap<>();
+        Set<Vertex> visited = new HashSet<>();
+
+        // Initialize tracking maps
+        for (Vertex v : vertices) {
+            discoveryTime.put(v, -1);
+            low.put(v, -1);
+            parent.put(v, null);
+        }
+
+        // Call DFS for bridge detection
+        for (Vertex v : vertices) {
+            if (!visited.contains(v)) {
+                dfsForBridges(v, visited, discoveryTime, low, parent);
+            }
+        }
+    }
+
+    private void dfsForBridges(Vertex u, Set<Vertex> visited,
+                               Map<Vertex, Integer> discoveryTime,
+                               Map<Vertex, Integer> low,
+                               Map<Vertex, Vertex> parent) {
+        visited.add(u);
+        discoveryTime.put(u, time);
+        low.put(u, time);
+        time++;
+
+        for (Vertex v : u.connectedVertices) {
+            if (!visited.contains(v)) {  // If v is not visited, it's a tree edge
+                parent.put(v, u);
+                dfsForBridges(v, visited, discoveryTime, low, parent);
+
+                // Check if the subtree has a back connection
+                low.put(u, Math.min(low.get(u), low.get(v)));
+
+                // **Bridge condition**: If no back connection, it's a bridge
+                if (low.get(v) > discoveryTime.get(u)) {
+                    System.out.println("Bridge found: " + u.name + " - " + v.name);
+                }
+            } else if (!v.equals(parent.get(u))) { // Back edge case
+                low.put(u, Math.min(low.get(u), discoveryTime.get(v)));
             }
         }
     }
