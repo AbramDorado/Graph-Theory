@@ -6,6 +6,8 @@ package graphtheory;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+
 
 /**
  *
@@ -17,13 +19,15 @@ public class Edge {
     public Vertex vertex2;
     public boolean wasFocused;
     public boolean wasClicked;
+    int weight;
 
-    public Edge(Vertex v1, Vertex v2) {
+    public Edge(Vertex v1, Vertex v2, int weight) {
         vertex1 = v1;
         vertex2 = v2;
+        this.weight = weight;
     }
 
-    public void draw(Graphics g) {
+    public void draw(Graphics2D g, boolean isBridge) {
         if (wasClicked) {
             g.setColor(Color.red);
         } else if (wasFocused) {
@@ -31,8 +35,17 @@ public class Edge {
         } else {
             g.setColor(Color.black);
         }
+        if (isBridge) {
+            g.setColor(Color.RED); // Highlight bridges
+        } else {
+            g.setColor(Color.BLACK); // Default edge color
+        }
         g.drawLine(vertex1.location.x, vertex1.location.y, vertex2.location.x, vertex2.location.y);
+        int midX = (vertex1.location.x + vertex2.location.x) / 2;
+        int midY = (vertex1.location.y + vertex2.location.y) / 2;
 
+        g.setColor(Color.black);  // Ensure the text is always visible
+        g.drawString(String.valueOf(weight), midX, midY);
     }
 
     public boolean hasIntersection(int x, int y) {
@@ -68,4 +81,10 @@ public class Edge {
         return false;
 
     }
+    
+    @Override
+    public String toString() {
+        return "(" + vertex1.name + "-" + vertex2.name + ")";
+    }
+
 }

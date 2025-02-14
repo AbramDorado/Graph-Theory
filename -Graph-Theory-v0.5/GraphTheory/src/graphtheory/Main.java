@@ -10,7 +10,7 @@ public class Main {
 
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         Date date = new Date();
-        new Canvas("Graph Theory SY08-09 Term3 by Team DGLSS v0.5 " + date.toString(), 800, 600, Color.WHITE);
+        new Canvas("Graph Theory Dorado Sancio Simangan " + date.toString(), 900, 700, Color.WHITE);
 
     }
 }

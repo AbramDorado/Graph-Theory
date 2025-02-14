@@ -9,6 +9,7 @@ import java.awt.Graphics;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Vector;
+import java.util.*;
 
 /**
  *
@@ -19,6 +20,11 @@ public class GraphProperties {
     public int[][] adjacencyMatrix;
     public int[][] distanceMatrix;
     public Vector<VertexPair> vpList;
+    private int time = 0;
+
+    public Set<Vertex> cutpoints;
+    public Set<Edge> bridges = new HashSet<>();
+
 
     public int[][] generateAdjacencyMatrix(Vector<Vertex> vList, Vector<Edge> eList) {
         adjacencyMatrix = new int[vList.size()][vList.size()];
@@ -36,6 +42,135 @@ public class GraphProperties {
         }
         return adjacencyMatrix;
     }
+
+    public Set<Vertex> identifyCutpoints(Vector<Vertex> vList) {
+        cutpoints = new HashSet<>();
+        int[] discoveryTime = new int[vList.size()];
+        int[] low = new int[vList.size()];
+        boolean[] visited = new boolean[vList.size()];
+        int[] parent = new int[vList.size()];
+        int time = 0;
+
+        // initialize
+        for (int i = 0; i < vList.size(); i++) {
+            parent[i] = -1;
+            visited[i] = false;
+        }
+
+        for (int i = 0; i < vList.size(); i++) {
+            if (!visited[i]) {
+                dfs(vList, i, visited, discoveryTime, low, parent, cutpoints, time);
+            }
+        }
+
+        return cutpoints;
+    }
+
+    public String printCutpoints(Graphics g) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Cutpoints : [");
+        for (Vertex v : cutpoints) {
+            sb.append(v.name).append(", ");
+        }
+        if (!cutpoints.isEmpty()) {
+            sb.setLength(sb.length() - 2);
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+    private void dfs(Vector<Vertex> vList, int u, boolean[] visited, int[] discoveryTime, int[] low, int[] parent, Set<Vertex> cutpoints, int time) {
+        int children = 0;
+        visited[u] = true;
+        discoveryTime[u] = low[u] = ++time;
+
+        for (Vertex v : vList.get(u).connectedVertices) {
+            int vIndex = vList.indexOf(v);
+            if (!visited[vIndex]) {
+                children++;
+                parent[vIndex] = u;
+                dfs(vList, vIndex, visited, discoveryTime, low, parent, cutpoints, time);
+
+                low[u] = Math.min(low[u], low[vIndex]);
+
+                if (parent[u] == -1 && children > 1) {
+                    cutpoints.add(vList.get(u));
+                }
+
+                if (parent[u] != -1 && low[vIndex] >= discoveryTime[u]) {
+                    cutpoints.add(vList.get(u));
+                }
+            } else if (vIndex != parent[u]) {
+                low[u] = Math.min(low[u], discoveryTime[vIndex]);
+            }
+        }
+    }
+
+
+    public Set<Edge> identifyBridges(Vector<Vertex> vList, Vector<Edge> eList) {
+        bridges = new HashSet<>();
+        int[] discoveryTime = new int[vList.size()];
+        int[] low = new int[vList.size()];
+        boolean[] visited = new boolean[vList.size()];
+        int[] parent = new int[vList.size()];
+        int time = 0;
+    
+        // Initialize
+        for (int i = 0; i < vList.size(); i++) {
+            parent[i] = -1;
+            visited[i] = false;
+        }
+    
+        for (int i = 0; i < vList.size(); i++) {
+            if (!visited[i]) {
+                dfsForBridges(vList, eList, i, visited, discoveryTime, low, parent, time);
+            }
+        }
+        System.out.println("Bridges detected: " + bridges);
+
+        return bridges;
+    }
+
+    public String printBridges() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Bridges : [");
+        for (Edge e : bridges) {
+            sb.append("(").append(e.vertex1.name).append("-").append(e.vertex2.name).append("), ");
+        }
+        if (!bridges.isEmpty()) {
+            sb.setLength(sb.length() - 2);
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+    
+
+    private void dfsForBridges(Vector<Vertex> vList, Vector<Edge> eList, int u, boolean[] visited, int[] discoveryTime, int[] low, int[] parent, int time) {
+        visited[u] = true;
+        discoveryTime[u] = low[u] = ++time;
+
+        for (Vertex v : vList.get(u).connectedVertices) {
+            int vIndex = vList.indexOf(v);
+            if (!visited[vIndex]) {
+                parent[vIndex] = u;
+                dfsForBridges(vList, eList, vIndex, visited, discoveryTime, low, parent, time);
+
+                low[u] = Math.min(low[u], low[vIndex]);
+
+                // If the edge (u, v) is a bridge
+                if (low[vIndex] > discoveryTime[u]) {
+                    for (Edge edge : eList) {
+                        if ((edge.vertex1 == vList.get(u) && edge.vertex2 == vList.get(vIndex)) ||
+                            (edge.vertex1 == vList.get(vIndex) && edge.vertex2 == vList.get(u))) {
+                            bridges.add(edge);
+                        }
+                    }
+                }
+            } else if (vIndex != parent[u]) {
+                low[u] = Math.min(low[u], discoveryTime[vIndex]);
+            }
+        }
+    }
+
 
     public int[][] generateDistanceMatrix(Vector<Vertex> vList) {
         distanceMatrix = new int[vList.size()][vList.size()];
@@ -87,7 +222,7 @@ public class GraphProperties {
 
                     for (int j = 0; j < vp.VertexDisjointContainer.get(i).size(); j++) //for every path in the container
                     {
-                        System.out.print("\t\tPath " + j + "\n\t\t\t");
+                        System.out.println("\t\tPath " + j + "\n\t\t\t");
                         for (int k = 0; k < vp.VertexDisjointContainer.get(i).get(j).size(); k++) {
                             System.out.print("-" + vp.VertexDisjointContainer.get(i).get(j).get(k).name);
                         }
@@ -194,7 +329,7 @@ public class GraphProperties {
         return toBeRemoved;
     }
 
-    private boolean graphConnectivity(Vector<Vertex> vList) {
+    private boolean graphConnectivity(Vector<Vertex> vList) { //Vertex connectivity
 
         Vector<Vertex> visitedList = new Vector<Vertex>();
 
@@ -255,6 +390,54 @@ public class GraphProperties {
                 return 1;
             } else {
                 return 0;
+            }
+        }
+    }
+
+    public void findBridges(List<Vertex> vertices, VertexPair vertexPair) {
+        Map<Vertex, Integer> discoveryTime = new HashMap<>();
+        Map<Vertex, Integer> low = new HashMap<>();
+        Map<Vertex, Vertex> parent = new HashMap<>();
+        Set<Vertex> visited = new HashSet<>();
+
+        // Initialize tracking maps
+        for (Vertex v : vertices) {
+            discoveryTime.put(v, -1);
+            low.put(v, -1);
+            parent.put(v, null);
+        }
+
+        // Call DFS for bridge detection
+        for (Vertex v : vertices) {
+            if (!visited.contains(v)) {
+                dfsForBridges(v, visited, discoveryTime, low, parent);
+            }
+        }
+    }
+
+    private void dfsForBridges(Vertex u, Set<Vertex> visited,
+                               Map<Vertex, Integer> discoveryTime,
+                               Map<Vertex, Integer> low,
+                               Map<Vertex, Vertex> parent) {
+        visited.add(u);
+        discoveryTime.put(u, time);
+        low.put(u, time);
+        time++;
+
+        for (Vertex v : u.connectedVertices) {
+            if (!visited.contains(v)) {  // If v is not visited, it's a tree edge
+                parent.put(v, u);
+                dfsForBridges(v, visited, discoveryTime, low, parent);
+
+                // Check if the subtree has a back connection
+                low.put(u, Math.min(low.get(u), low.get(v)));
+
+                // **Bridge condition**: If no back connection, it's a bridge
+                if (low.get(v) > discoveryTime.get(u)) {
+                    System.out.println("Bridge found: " + u.name + " - " + v.name);
+                }
+            } else if (!v.equals(parent.get(u))) { // Back edge case
+                low.put(u, Math.min(low.get(u), discoveryTime.get(v)));
             }
         }
     }

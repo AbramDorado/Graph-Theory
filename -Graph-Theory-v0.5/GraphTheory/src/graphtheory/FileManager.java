@@ -14,6 +14,8 @@ import java.io.Writer;
 import java.util.Scanner;
 import java.util.Vector;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
 
 /**
  *
@@ -85,9 +87,12 @@ public class FileManager {
                     }
 
 
-                    for (int l = j + 1; l < vertexList.size(); l++) { //edges
+                    for (int l = j + 1; l < vertexList.size(); l++) {
                         if (adjacencyLine.charAt(l) == '1') {
-                            Edge e = new Edge(vertexList.get(j), vertexList.get(l));
+                            // Prompt user for weight
+                            String weightStr = JOptionPane.showInputDialog("Enter weight for edge between " + vertexList.get(j).name + " and " + vertexList.get(l).name);
+                            int weight = Integer.parseInt(weightStr);
+                            Edge e = new Edge(vertexList.get(j), vertexList.get(l), weight);
                             edgeList.add(e);
                         }
                     }

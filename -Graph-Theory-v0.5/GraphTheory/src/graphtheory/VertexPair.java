@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import java.util.Vector;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  *
@@ -75,15 +79,15 @@ public class VertexPair {
                 }
             }
             if(!isAlreadyContained(tempPathList))
-            VertexDisjointContainer.add(tempPathList);
+                VertexDisjointContainer.add(tempPathList);
         }
-        
+
     }
     public boolean isAlreadyContained(Vector<Vector<Vertex>> c){
 
         for(Vector<Vector<Vertex>> d:VertexDisjointContainer){
-                if(d.containsAll(c))
-                    return true;
+            if(d.containsAll(c))
+                return true;
         }
         return false;
     }
@@ -130,9 +134,25 @@ public class VertexPair {
                 }
             }
         }
-
     }
-    // public void
+
+    public void dfs(Vertex start) {
+        Set<Vertex> visited = new HashSet<>();
+        dfsRecursive(start, visited);
+    }
+
+    private void dfsRecursive(Vertex v, Set<Vertex> visited) {
+        if (visited.contains(v)) return;
+
+        visited.add(v);
+        System.out.println("Visited: " + v.name);
+
+        for (Vertex neighbor : v.connectedVertices) {
+            if (!visited.contains(neighbor)) {
+                dfsRecursive(neighbor, visited);
+            }
+        }
+    }
 
     public class Paths {
 
