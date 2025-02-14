@@ -125,9 +125,19 @@ public class Canvas {
             if (selectedWindow == 0) {
                 switch (selectedTool) {
                     case 1: {
-                        Vertex v = new Vertex("" + vertexList.size(), e.getX(), e.getY());
+                        // Prompt user for name, weight, and label
+                        String name = JOptionPane.showInputDialog("Enter vertex name:");
+                        if (name == null || name.trim().isEmpty()) {
+                            return; // Cancel if no name is provided
+                        }
+
+
+                        // Create vertex with user input
+                        Vertex v = new Vertex(name, e.getX(), e.getY());
+
                         vertexList.add(v);
                         v.draw(graphic);
+                        Canvas.this.refresh();
                         break;
                     }
                     case 4: {
@@ -151,7 +161,7 @@ public class Canvas {
                         }*/ break;
                     }
                 }
-            //refresh();
+                //refresh();
             }
 
 
@@ -213,7 +223,9 @@ public class Canvas {
                         Vertex parentV = vertexList.get(clickedVertexIndex);
                         for (Vertex v : vertexList) {
                             if (v.hasIntersection(e.getX(), e.getY()) && v != parentV && !v.connectedToVertex(parentV)) {              //System.out.println(clickedVertexIndex+" "+vertexList.indexOf(v));
-                                Edge edge = new Edge(v, parentV);
+                                String weightStr = JOptionPane.showInputDialog("Enter weight for this edge:");
+                                int weight = Integer.parseInt(weightStr);
+                                Edge edge = new Edge(v, parentV, weight);
                                 v.addVertex(parentV);
                                 parentV.addVertex(v);
                                 v.wasClicked = false;
@@ -337,6 +349,7 @@ public class Canvas {
 
                     //VD paths
                     gP.displayContainers(vertexList);
+
 
                     // cutpoints
                     gP.identifyCutpoints(vertexList);

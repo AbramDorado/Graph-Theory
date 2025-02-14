@@ -23,6 +23,8 @@ public class Vertex implements Comparable {
     private int size2 = 40;
     public Vector<Vertex> connectedVertices;
 
+    String label;
+
     public Vertex(String name, int x, int y) {
         this.name = name;
         location = new Point(x, y);
@@ -79,4 +81,6 @@ public class Vertex implements Comparable {
         g.setColor(Color.BLACK);
         g.drawString(name, location.x, location.y);
     }
+
+
 }
