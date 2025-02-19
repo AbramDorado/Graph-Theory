@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.KeyEvent;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -356,6 +357,9 @@ public class Canvas {
                     //bridges
                     gP.identifyBridges(vertexList, edgeList);
 
+                    // degree distribution
+                    gP.computeDegreeDistribution(vertexList);
+
                     //refresh only if the graph isnt empty
                     refresh();
                     //gP.drawNWideDiameter();
@@ -477,6 +481,17 @@ public class Canvas {
                     g.drawString("See output console for Diameter of Graph", 100, height / 2 + 60);
                     g.drawString(gP.printCutpoints(canvasImage2.getGraphics()), 100, height / 2 + 30);
                     g.drawString(gP.printBridges(), 100, height / 2 + 45);
+
+                    // Compute degree distribution
+                    Map<Integer, Integer> degreeDist = gP.computeDegreeDistribution(vertexList);
+                    int yPosition = height / 2 + 75; // Start drawing below bridges info
+                    g.drawString("Degree Distribution:", 100, yPosition);
+
+                    for (Map.Entry<Integer, Integer> entry : degreeDist.entrySet()) {
+                        yPosition += 15;
+                        g.drawString("Degree " + entry.getKey() + ": " + entry.getValue() + " vertices", 100, yPosition);
+                    }
+
                     g.drawImage(canvasImage.getScaledInstance(width / 2, height / 2, Image.SCALE_SMOOTH), 0, 0, null); //layer 1
                     g.draw3DRect(0, 0, width / 2, height / 2, true);
                     g.setColor(Color.black);
