@@ -487,9 +487,10 @@ public class Canvas {
                     int yPosition = height / 2 + 75; // Start drawing below bridges info
                     g.drawString("Degree Distribution:", 100, yPosition);
 
+                    int vertexCount = vertexList.size();
                     for (Map.Entry<Integer, Integer> entry : degreeDist.entrySet()) {
                         yPosition += 15;
-                        g.drawString("Degree " + entry.getKey() + ": " + entry.getValue() + " vertices", 100, yPosition);
+                        g.drawString("Degree " + entry.getKey() + ": " + entry.getValue() + "/" + vertexCount +  " vertices", 100, yPosition);
                     }
 
                     g.drawImage(canvasImage.getScaledInstance(width / 2, height / 2, Image.SCALE_SMOOTH), 0, 0, null); //layer 1
