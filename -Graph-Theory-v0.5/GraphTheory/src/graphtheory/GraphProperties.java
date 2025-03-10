@@ -6,9 +6,6 @@ package graphtheory;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Vector;
 import java.util.*;
 
 /**
@@ -24,6 +21,17 @@ public class GraphProperties {
 
     public Set<Vertex> cutpoints;
     public Set<Edge> bridges = new HashSet<>();
+
+    public Map<Integer, Integer> computeDegreeDistribution(Vector<Vertex> vList) {
+        Map<Integer, Integer> degreeCount = new HashMap<>();
+
+        for (Vertex v : vList) {
+            int degree = v.getDegree();
+            degreeCount.put(degree, degreeCount.getOrDefault(degree, 0) + 1);
+        }
+
+        return degreeCount;
+    }
 
 
     public int[][] generateAdjacencyMatrix(Vector<Vertex> vList, Vector<Edge> eList) {
