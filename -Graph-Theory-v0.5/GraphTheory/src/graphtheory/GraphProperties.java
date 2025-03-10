@@ -22,6 +22,29 @@ public class GraphProperties {
     public Set<Vertex> cutpoints;
     public Set<Edge> bridges = new HashSet<>();
 
+    public Map<Vertex, Integer> computeDegrees(Vector<Vertex> vList) {
+        Map<Vertex, Integer> degreeMap = new HashMap<>();
+
+        for (Vertex v : vList) {
+            degreeMap.put(v, v.getDegree()); // Assuming Vertex class has getDegree()
+        }
+
+        return degreeMap;
+    }
+
+    public String printDegrees(Vector<Vertex> vList) {
+        StringBuilder sb = new StringBuilder();
+
+        Map<Vertex, Integer> degreeMap = computeDegrees(vList);
+        for (Map.Entry<Vertex, Integer> entry : degreeMap.entrySet()) {
+            sb.append("Vertex ").append(entry.getKey().name)
+                    .append(": Degree = ").append(entry.getValue()).append("\n");
+        }
+
+        return sb.toString();
+    }
+
+
     public Map<Integer, Integer> computeDegreeDistribution(Vector<Vertex> vList) {
         Map<Integer, Integer> degreeCount = new HashMap<>();
 

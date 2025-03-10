@@ -463,19 +463,20 @@ public class Canvas {
 
         public void paint(Graphics g) {
             switch (selectedWindow) {
-                case 0: {   //graph window
+                case 0: {   // Graph window
                     graphic.drawString("Vertex Count=" + vertexList.size() +
                             "  Edge Count=" + edgeList.size() +
                             "  Selected Tool=" + selectedTool, 50, height / 2 + (height * 2) / 5);
-                    g.drawImage(canvasImage, 0, 0, null); //layer 1
+                    g.drawImage(canvasImage, 0, 0, null); // layer 1
                     g.setColor(Color.black);
                     break;
                 }
-                case 1: {   //properties window
-                    canvasImage2.getGraphics().clearRect(0, 0, width, height); //clear
-                    gP.drawAdjacencyMatrix(canvasImage2.getGraphics(), vertexList, width / 2 + 50, 50);//draw adjacency matrix
-                    gP.drawDistanceMatrix(canvasImage2.getGraphics(), vertexList, width / 2 + 50, height / 2 + 50);//draw distance matrix
-                    g.drawImage(canvasImage2, 0, 0, null); //layer 1
+                case 1: {   // Properties window
+                    canvasImage2.getGraphics().clearRect(0, 0, width, height); // Clear
+                    gP.drawAdjacencyMatrix(canvasImage2.getGraphics(), vertexList, width / 2 + 50, 50);
+                    gP.drawDistanceMatrix(canvasImage2.getGraphics(), vertexList, width / 2 + 50, height / 2 + 50);
+                    g.drawImage(canvasImage2, 0, 0, null); // layer 1
+
                     drawString("Graph disconnects when nodes in color red are removed.", 100, height - 30, 20);
                     drawString("Edges in red are bridges (removing them will split the graph).", 100, height - 10, 20);
                     g.drawString("See output console for Diameter of Graph", 100, height / 2 + 60);
@@ -483,24 +484,37 @@ public class Canvas {
                     g.drawString(gP.printBridges(), 100, height / 2 + 45);
 
                     // Compute degree distribution
-                    Map<Integer, Integer> degreeDist = gP.computeDegreeDistribution(vertexList);
                     int yPosition = height / 2 + 75; // Start drawing below bridges info
                     g.drawString("Degree Distribution:", 100, yPosition);
 
+                    Map<Integer, Integer> degreeDist = gP.computeDegreeDistribution(vertexList);
                     int vertexCount = vertexList.size();
+
                     for (Map.Entry<Integer, Integer> entry : degreeDist.entrySet()) {
                         yPosition += 15;
-                        g.drawString("Degree " + entry.getKey() + ": " + entry.getValue() + "/" + vertexCount +  " vertices", 100, yPosition);
+                        g.drawString("Degree " + entry.getKey() + ": " + entry.getValue() + "/" + vertexCount + " vertices", 100, yPosition);
                     }
 
-                    g.drawImage(canvasImage.getScaledInstance(width / 2, height / 2, Image.SCALE_SMOOTH), 0, 0, null); //layer 1
+                    // Add spacing before printing vertex degrees
+                    yPosition += 20;
+                    g.drawString("Vertex Degrees:", 100, yPosition);
+
+                    // Get the degree information from GraphProperties
+                    String degreesText = gP.printDegrees(vertexList);
+                    String[] lines = degreesText.split("\n");
+
+                    for (String line : lines) {
+                        yPosition += 15; // Space out each line
+                        g.drawString(line, 100, yPosition);
+                    }
+
+                    g.drawImage(canvasImage.getScaledInstance(width / 2, height / 2, Image.SCALE_SMOOTH), 0, 0, null); // Layer 1
                     g.draw3DRect(0, 0, width / 2, height / 2, true);
                     g.setColor(Color.black);
 
                     break;
                 }
             }
-
         }
     }
 }
