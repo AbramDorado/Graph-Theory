@@ -82,7 +82,6 @@ public class Canvas {
         menuOptions.add(item);
         item = new JMenuItem("Remove Tool");
         item.addActionListener(new MenuListener());
-        item.setEnabled(false);
         menuOptions.add(item);
         item = new JMenuItem("Auto Arrange Vertices");
         item.addActionListener(new MenuListener());
@@ -142,24 +141,21 @@ public class Canvas {
                         break;
                     }
                     case 4: {
-
-                        /* for (Vertex v : vertexList) {
-                        if (v.hasIntersection(e.getX(), e.getY())) {
-                        {
-                        for (Edge d : edgeList) {
-                        if (d.vertex1 == v || d.vertex2 == v) {
-                        edgeList.remove(d);
-                        }
-                        }
-                        for (Vertex x : vertexList) {
-                        if (x.connectedToVertex(v)) {
-                        x.connectedVertices.remove(v);
-                        }
-                        }
-                        vertexList.remove(v);
-                        }
-                        }
-                        }*/ break;
+                        for (Vertex v : vertexList) {
+                            if (v.hasIntersection(e.getX(), e.getY())) {
+                                for (Edge d : edgeList) {
+                                    if (d.vertex1 == v || d.vertex2 == v) {
+                                        edgeList.remove(d);
+                                    }
+                                }
+                                for (Vertex x : vertexList) {
+                                    if (x.connectedToVertex(v)) {
+                                        x.connectedVertices.remove(v);
+                                    }
+                                }
+                                vertexList.remove(v);
+                            }
+                        } break;
                     }
                 }
                 //refresh();
