@@ -82,5 +82,8 @@ public class Vertex implements Comparable {
         g.drawString(name, location.x, location.y);
     }
 
+    public String getName() {
+        return name; // Add this method
+    }
 
 }

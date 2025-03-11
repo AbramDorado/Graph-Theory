@@ -22,6 +22,20 @@ public class GraphProperties {
     public Set<Vertex> cutpoints;
     public Set<Edge> bridges = new HashSet<>();
 
+    public String printWeightedDegrees(Vector<Vertex> vertexList, Vector<Edge> edgeList) {
+        StringBuilder weightedDegrees = new StringBuilder();
+        for (Vertex vertex : vertexList) {
+            int weightedDegree = 0;
+            for (Edge edge : edgeList) {
+                if (edge.vertex1 == vertex || edge.vertex2 == vertex) {
+                    weightedDegree += edge.weight; // Assuming `weight` is a field in Edge
+                }
+            }
+            weightedDegrees.append("Weighted Degree of ").append(vertex.getName()).append(": ").append(weightedDegree).append("\n");
+        }
+        return weightedDegrees.toString();
+    }
+
     public Map<Vertex, Integer> computeDegrees(Vector<Vertex> vList) {
         Map<Vertex, Integer> degreeMap = new HashMap<>();
 

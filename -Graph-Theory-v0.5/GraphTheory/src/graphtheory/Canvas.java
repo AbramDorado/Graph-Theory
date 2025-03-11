@@ -508,6 +508,19 @@ public class Canvas {
                         g.drawString(line, 100, yPosition);
                     }
 
+                    // Add spacing before printing weighted vertex degrees
+                    yPosition += 20;
+                    g.drawString("Weighted Vertex Degrees:", 100, yPosition);
+
+                    // Get the weighted degree information from GraphProperties
+                    String weightedDegreesText = gP.printWeightedDegrees(vertexList, edgeList);
+                    String[] weightedLines = weightedDegreesText.split("\n");
+
+                    for (String line : weightedLines) {
+                        yPosition += 15; // Space out each line
+                        g.drawString(line, 100, yPosition);
+                    }
+
                     g.drawImage(canvasImage.getScaledInstance(width / 2, height / 2, Image.SCALE_SMOOTH), 0, 0, null); // Layer 1
                     g.draw3DRect(0, 0, width / 2, height / 2, true);
                     g.setColor(Color.black);
