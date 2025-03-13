@@ -27,7 +27,7 @@ public class Edge {
         this.weight = weight;
     }
 
-    public void draw(Graphics2D g, boolean isBridge) {
+    public void draw(Graphics2D g) {
         if (wasClicked) {
             g.setColor(Color.red);
         } else if (wasFocused) {
@@ -35,11 +35,7 @@ public class Edge {
         } else {
             g.setColor(Color.black);
         }
-        if (isBridge) {
-            g.setColor(Color.RED); // Highlight bridges
-        } else {
-            g.setColor(Color.BLACK); // Default edge color
-        }
+
         g.drawLine(vertex1.location.x, vertex1.location.y, vertex2.location.x, vertex2.location.y);
         int midX = (vertex1.location.x + vertex2.location.x) / 2;
         int midY = (vertex1.location.y + vertex2.location.y) / 2;

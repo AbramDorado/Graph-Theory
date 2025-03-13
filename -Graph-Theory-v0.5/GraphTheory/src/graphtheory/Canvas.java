@@ -32,6 +32,7 @@ public class Canvas {
     private int clickedEdgeIndex;
     private FileManager fileManager = new FileManager();
 
+
     /////////////
     private Vector<Vertex> vertexList;
     private Vector<Edge> edgeList;
@@ -130,8 +131,6 @@ public class Canvas {
                         if (name == null || name.trim().isEmpty()) {
                             return; // Cancel if no name is provided
                         }
-
-
                         // Create vertex with user input
                         Vertex v = new Vertex(name, e.getX(), e.getY());
 
@@ -336,9 +335,12 @@ public class Canvas {
 
                     //connectivity
                     Vector<Vertex> tempList = gP.vertexConnectivity(vertexList);
+
+                    /*
                     for (Vertex v : tempList) {
                         vertexList.get(vertexList.indexOf(v)).wasClicked = true;
                     }
+                    */
                     reloadVertexConnections(matrix, vertexList);
 
                     //distance
@@ -349,12 +351,20 @@ public class Canvas {
 
 
                     // cutpoints
-                    gP.identifyCutpoints(vertexList);
+                    Set<Vertex> cutpointSet = gP.identifyCutpoints(vertexList);
+                    for (Vertex c : cutpointSet) {
+                        c.wasClicked = true;
+                    }
                     //bridges
-                    gP.identifyBridges(vertexList, edgeList);
+                    Set<Edge> bridgeSet = gP.identifyBridges(vertexList, edgeList);
+                    for (Edge b : bridgeSet) {
+                        b.wasClicked = true;
+                    }
 
                     // degree distribution
                     gP.computeDegreeDistribution(vertexList);
+
+                    gP.displayDegreeDistributionGraph(vertexList, 600, 400);
 
                     //refresh only if the graph isnt empty
                     refresh();
@@ -363,7 +373,7 @@ public class Canvas {
                 erase();
                 refresh();
             }
-            
+
         }
     }
 
@@ -410,7 +420,7 @@ public class Canvas {
 
     public void refresh() {
         for (Edge e : edgeList) {
-            e.draw(graphic, gP.bridges.contains(e));
+            e.draw(graphic);
         }
         for (Vertex v : vertexList) {
             v.draw(graphic);
@@ -473,23 +483,27 @@ public class Canvas {
                     gP.drawDistanceMatrix(canvasImage2.getGraphics(), vertexList, width / 2 + 50, height / 2 + 50);
                     g.drawImage(canvasImage2, 0, 0, null); // layer 1
 
-                    drawString("Graph disconnects when nodes in color red are removed.", 100, height - 30, 20);
-                    drawString("Edges in red are bridges (removing them will split the graph).", 100, height - 10, 20);
+                    drawString("Nodes in red are cutpoints & Edges in red are bridges.", 100, height - 30, 20);
+                    drawString("Graph will disconnect if one of them is removed.", 100, height - 10, 20);
                     g.drawString("See output console for Diameter of Graph", 100, height / 2 + 60);
                     g.drawString(gP.printCutpoints(canvasImage2.getGraphics()), 100, height / 2 + 30);
                     g.drawString(gP.printBridges(), 100, height / 2 + 45);
 
                     // Compute degree distribution
                     int yPosition = height / 2 + 75; // Start drawing below bridges info
+                    /*
                     g.drawString("Degree Distribution:", 100, yPosition);
 
-                    Map<Integer, Integer> degreeDist = gP.computeDegreeDistribution(vertexList);
+                    Map<Integer, Double> degreeDist = gP.computeDegreeDistribution(vertexList);
                     int vertexCount = vertexList.size();
 
-                    for (Map.Entry<Integer, Integer> entry : degreeDist.entrySet()) {
+                    for (Map.Entry<Integer, Double> entry : degreeDist.entrySet()) {
                         yPosition += 15;
                         g.drawString("Degree " + entry.getKey() + ": " + entry.getValue() + "/" + vertexCount + " vertices", 100, yPosition);
                     }
+
+
+                    /*
 
                     // Add spacing before printing vertex degrees
                     yPosition += 20;
@@ -504,15 +518,50 @@ public class Canvas {
                         g.drawString(line, 100, yPosition);
                     }
 
+
                     // Add spacing before printing weighted vertex degrees
                     yPosition += 20;
                     g.drawString("Weighted Vertex Degrees:", 100, yPosition);
+
+
 
                     // Get the weighted degree information from GraphProperties
                     String weightedDegreesText = gP.printWeightedDegrees(vertexList, edgeList);
                     String[] weightedLines = weightedDegreesText.split("\n");
 
                     for (String line : weightedLines) {
+                        yPosition += 15; // Space out each line
+                        g.drawString(line, 100, yPosition);
+                    }
+
+
+                    String betweennessText = gP.printBetweenness(vertexList);
+                    String[] betweennessLines = betweennessText.split("\n");
+
+                    for (String line : betweennessLines) {
+                        yPosition += 15; // Space out each line
+                        g.drawString(line, 100, yPosition);
+                    }
+
+
+                    String closenessText = gP.printClosenessCentrality(vertexList);
+                    String[] closenessLines = closenessText.split("\n");
+
+                    for (String line : closenessLines) {
+                        yPosition += 15; // Space out each line
+                        g.drawString(line, 100, yPosition);
+                    }
+
+
+                    */
+
+                    yPosition += 25; // Adjust position as needed
+                    g.drawString("Centrality Measures:", 100, yPosition);
+
+                    String centralityTable = gP.printCentralityMeasures(vertexList);
+                    String[] centralityLines = centralityTable.split("\n");
+
+                    for (String line : centralityLines) {
                         yPosition += 15; // Space out each line
                         g.drawString(line, 100, yPosition);
                     }

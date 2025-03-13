@@ -4,6 +4,7 @@
  */
 package graphtheory;
 
+import javax.swing.*;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.*;
@@ -36,6 +37,80 @@ public class GraphProperties {
         return weightedDegrees.toString();
     }
 
+    public Map<Vertex, Double> computeBetweennessCentrality(Vector<Vertex> vList) {
+        Map<Vertex, Double> betweenness = new HashMap<>();
+        for (Vertex v : vList) {
+            betweenness.put(v, 0.0);
+        }
+
+        for (Vertex s : vList) {
+            Stack<Vertex> stack = new Stack<>();
+            Map<Vertex, List<Vertex>> predecessors = new HashMap<>();
+            Map<Vertex, Integer> distance = new HashMap<>();
+            Map<Vertex, Integer> sigma = new HashMap<>();
+            Map<Vertex, Double> delta = new HashMap<>();
+
+            for (Vertex v : vList) {
+                predecessors.put(v, new ArrayList<>());
+                distance.put(v, -1);
+                sigma.put(v, 0);
+                delta.put(v, 0.0);
+            }
+
+            distance.put(s, 0);
+            sigma.put(s, 1);
+            Queue<Vertex> queue = new LinkedList<>();
+            queue.add(s);
+
+            while (!queue.isEmpty()) {
+                Vertex v = queue.poll();
+                stack.push(v);
+
+                for (Vertex w : v.connectedVertices) {
+                    if (distance.get(w) < 0) {
+                        queue.add(w);
+                        distance.put(w, distance.get(v) + 1);
+                    }
+
+                    if (distance.get(w) == distance.get(v) + 1) {
+                        sigma.put(w, sigma.get(w) + sigma.get(v));
+                        predecessors.get(w).add(v);
+                    }
+                }
+            }
+
+            while (!stack.isEmpty()) {
+                Vertex w = stack.pop();
+                for (Vertex v : predecessors.get(w)) {
+                    delta.put(v, delta.get(v) + (sigma.get(v) * 1.0 / sigma.get(w)) * (1 + delta.get(w)));
+                }
+                if (!w.equals(s)) {
+                    betweenness.put(w, betweenness.get(w) + delta.get(w));
+                }
+            }
+        }
+
+        // Normalize for undirected graphs
+        for (Map.Entry<Vertex, Double> entry : betweenness.entrySet()) {
+            entry.setValue(entry.getValue() / 2);
+        }
+
+        return betweenness;
+    }
+
+    public String printBetweenness(Vector<Vertex> vList) {
+        StringBuilder sb = new StringBuilder();
+        Map<Vertex, Double> betweenness = computeBetweennessCentrality(vList);
+
+        sb.append("Betweenness Centrality:\n");
+        for (Map.Entry<Vertex, Double> entry : betweenness.entrySet()) {
+            sb.append("Vertex ").append(entry.getKey().name)
+                    .append(": ").append(entry.getValue()).append("\n");
+        }
+
+        return sb.toString();
+    }
+
     public Map<Vertex, Integer> computeDegrees(Vector<Vertex> vList) {
         Map<Vertex, Integer> degreeMap = new HashMap<>();
 
@@ -58,18 +133,186 @@ public class GraphProperties {
         return sb.toString();
     }
 
+    public Map<Vertex, Double> computeClosenessCentrality(Vector<Vertex> vList) {
+        Map<Vertex, Double> closenessCentrality = new HashMap<>();
 
-    public Map<Integer, Integer> computeDegreeDistribution(Vector<Vertex> vList) {
+        // Generate the distance matrix (if not already generated)
+        if (distanceMatrix == null) {
+            generateDistanceMatrix(vList);
+        }
+
+        int N = vList.size(); // Total number of vertices
+
+        // Calculate closeness centrality for each vertex
+        for (Vertex v : vList) {
+            int sumOfDistances = 0;
+            int reachableVertices = 0;
+
+            for (Vertex u : vList) {
+                if (!u.equals(v)) {
+                    int distance = distanceMatrix[vList.indexOf(v)][vList.indexOf(u)];
+                    if (distance != Integer.MAX_VALUE) { // Ensure the vertex is reachable
+                        sumOfDistances += distance;
+                        reachableVertices++;
+                    }
+                }
+            }
+
+            // If the vertex is reachable to at least one other vertex
+            if (reachableVertices > 0) {
+                double averageDistance = (sumOfDistances * 1.0) / (N - 1);
+                double centrality = 1.0 / averageDistance;
+                closenessCentrality.put(v, centrality);
+            } else {
+                closenessCentrality.put(v, 0.0); // Disconnected vertex
+            }
+        }
+
+        return closenessCentrality;
+    }
+
+    public String printClosenessCentrality(Vector<Vertex> vList) {
+        StringBuilder sb = new StringBuilder();
+        Map<Vertex, Double> closenessCentrality = computeClosenessCentrality(vList);
+
+        sb.append("Closeness Centrality:\n");
+        for (Map.Entry<Vertex, Double> entry : closenessCentrality.entrySet()) {
+            sb.append("Vertex ").append(entry.getKey().name)
+                    .append(": ").append(entry.getValue()).append("\n");
+        }
+
+        return sb.toString();
+    }
+
+    public Map<Vertex, Map<String, Double>> computeCentralityMeasures(Vector<Vertex> vList) {
+        Map<Vertex, Map<String, Double>> centralityMeasures = new HashMap<>();
+
+        // Compute Betweenness Centrality
+        Map<Vertex, Double> betweenness = computeBetweennessCentrality(vList);
+
+        // Compute Closeness Centrality
+        Map<Vertex, Double> closeness = computeClosenessCentrality(vList);
+
+        // Compute Degree Centrality
+        Map<Vertex, Integer> degrees = computeDegrees(vList);
+
+        // Combine all measures into a single map
+        for (Vertex v : vList) {
+            Map<String, Double> measures = new HashMap<>();
+            measures.put("Betweenness", betweenness.get(v));
+            measures.put("Closeness", closeness.get(v));
+            measures.put("Degree", degrees.get(v).doubleValue()); // Convert to Double
+            centralityMeasures.put(v, measures);
+        }
+
+        return centralityMeasures;
+    }
+
+    public String printCentralityMeasures(Vector<Vertex> vList) {
+        StringBuilder sb = new StringBuilder();
+        Map<Vertex, Map<String, Double>> centralityMeasures = computeCentralityMeasures(vList);
+
+        // Table Header
+        sb.append(String.format("%-15s %-15s %-15s %-15s\n", "Vertex", "Betweenness", "Closeness", "Degree"));
+
+        // Table Rows
+        for (Vertex v : vList) {
+            Map<String, Double> measures = centralityMeasures.get(v);
+            sb.append(String.format("%-15s %-15.4f %-15.4f %-15.4f\n",
+                    v.name,
+                    measures.get("Betweenness"),
+                    measures.get("Closeness"),
+                    measures.get("Degree")));
+        }
+
+        return sb.toString();
+    }
+
+
+    public Map<Integer, Double> computeDegreeDistribution(Vector<Vertex> vList) {
         Map<Integer, Integer> degreeCount = new HashMap<>();
+        int totalVertices = vList.size();
 
+        // Count the number of vertices with each degree
         for (Vertex v : vList) {
             int degree = v.getDegree();
             degreeCount.put(degree, degreeCount.getOrDefault(degree, 0) + 1);
         }
 
-        return degreeCount;
+        // Convert counts to decimal fractions
+        Map<Integer, Double> degreeDistribution = new HashMap<>();
+        for (Map.Entry<Integer, Integer> entry : degreeCount.entrySet()) {
+            int degree = entry.getKey();
+            int count = entry.getValue();
+            double fraction = (double) count / totalVertices;
+            degreeDistribution.put(degree, fraction);
+        }
+
+        return degreeDistribution;
     }
 
+    public void displayDegreeDistributionGraph(Vector<Vertex> vList, int width, int height) {
+        // Compute degree distribution as decimal fractions
+        Map<Integer, Double> degreeDistribution = computeDegreeDistribution(vList);
+
+        // Create a new JFrame for the graph
+        JFrame frame = new JFrame("Degree Distribution Graph");
+        frame.setSize(width, height); // Set the size of the pop-up window
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        // Create a custom JPanel to draw the graph
+        JPanel graphPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                drawDegreeDistributionGraph(g, degreeDistribution, width, height);
+            }
+        };
+
+        frame.add(graphPanel);
+        frame.setVisible(true);
+    }
+
+    private void drawDegreeDistributionGraph(Graphics g, Map<Integer, Double> degreeDistribution, int width, int height) {
+        int margin = 50;
+        int barWidth = 30;
+        int maxBarHeight = height - 2 * margin; // Adjust bar height based on window height
+        int x = margin;
+        int y = height - margin;
+
+        // Find the maximum fraction for scaling
+        double maxFraction = degreeDistribution.values().stream().max(Double::compare).orElse(1.0);
+
+        // Draw axes
+        g.setColor(Color.BLACK);
+        g.drawLine(margin, margin, margin, y); // Y-axis
+        g.drawLine(margin, y, width - margin, y); // X-axis
+
+        // Draw bars for each degree
+        for (Map.Entry<Integer, Double> entry : degreeDistribution.entrySet()) {
+            int degree = entry.getKey();
+            double fraction = entry.getValue();
+            int barHeight = (int) ((fraction / maxFraction) * maxBarHeight);
+
+            // Draw bar
+            g.setColor(Color.BLUE);
+            g.fillRect(x, y - barHeight, barWidth, barHeight);
+
+            // Draw degree label
+            g.setColor(Color.BLACK);
+            g.drawString(String.valueOf(degree), x + barWidth / 2 - 5, y + 15);
+
+            // Draw fraction label
+            g.drawString(String.format("%.2f", fraction), x + barWidth / 2 - 10, y - barHeight - 5);
+
+            x += barWidth + 10; // Move to the next bar
+        }
+
+        // Draw Y-axis labels
+        g.drawString("Frequency", margin - 40, margin - 10);
+        g.drawString("0", margin - 20, y);
+        g.drawString(String.format("%.2f", maxFraction), margin - 40, margin);
+    }
 
     public int[][] generateAdjacencyMatrix(Vector<Vertex> vList, Vector<Edge> eList) {
         adjacencyMatrix = new int[vList.size()][vList.size()];
