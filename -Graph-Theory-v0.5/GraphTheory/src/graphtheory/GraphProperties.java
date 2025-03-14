@@ -23,6 +23,22 @@ public class GraphProperties {
     public Set<Vertex> cutpoints;
     public Set<Edge> bridges = new HashSet<>();
 
+    public Map<Vertex, Double> computeWeightedDegrees(Vector<Vertex> vList, Vector<Edge> eList) {
+        Map<Vertex, Double> weightedDegrees = new HashMap<>();
+
+        for (Vertex v : vList) {
+            double weightedDegree = 0.0;
+            for (Edge e : eList) {
+                if (e.vertex1 == v || e.vertex2 == v) {
+                    weightedDegree += e.weight; // Sum the weights of connected edges
+                }
+            }
+            weightedDegrees.put(v, weightedDegree);
+        }
+
+        return weightedDegrees;
+    }
+
     public String printWeightedDegrees(Vector<Vertex> vertexList, Vector<Edge> edgeList) {
         StringBuilder weightedDegrees = new StringBuilder();
         for (Vertex vertex : vertexList) {
@@ -184,7 +200,7 @@ public class GraphProperties {
         return sb.toString();
     }
 
-    public Map<Vertex, Map<String, Double>> computeCentralityMeasures(Vector<Vertex> vList) {
+    public Map<Vertex, Map<String, Double>> computeCentralityMeasures(Vector<Vertex> vList, Vector<Edge> eList) {
         Map<Vertex, Map<String, Double>> centralityMeasures = new HashMap<>();
 
         // Compute Betweenness Centrality
@@ -196,33 +212,39 @@ public class GraphProperties {
         // Compute Degree Centrality
         Map<Vertex, Integer> degrees = computeDegrees(vList);
 
+        // Compute Weighted Degree
+        Map<Vertex, Double> weightedDegrees = computeWeightedDegrees(vList, eList);
+
         // Combine all measures into a single map
         for (Vertex v : vList) {
             Map<String, Double> measures = new HashMap<>();
             measures.put("Betweenness", betweenness.get(v));
             measures.put("Closeness", closeness.get(v));
             measures.put("Degree", degrees.get(v).doubleValue()); // Convert to Double
+            measures.put("Weighted Degree", weightedDegrees.get(v)); // Add Weighted Degree
             centralityMeasures.put(v, measures);
         }
 
         return centralityMeasures;
     }
 
-    public String printCentralityMeasures(Vector<Vertex> vList) {
+    public String printCentralityMeasures(Vector<Vertex> vList, Vector<Edge> eList) {
         StringBuilder sb = new StringBuilder();
-        Map<Vertex, Map<String, Double>> centralityMeasures = computeCentralityMeasures(vList);
+        Map<Vertex, Map<String, Double>> centralityMeasures = computeCentralityMeasures(vList, eList);
 
         // Table Header
-        sb.append(String.format("%-15s %-15s %-15s %-15s\n", "Vertex", "Betweenness", "Closeness", "Degree"));
+        sb.append(String.format("%-10s %-12s %-13s %-13s %-13s\n",
+                "Vertex", "Betweenness", "Closeness", "Degree", "Weighted Degree"));
 
         // Table Rows
         for (Vertex v : vList) {
             Map<String, Double> measures = centralityMeasures.get(v);
-            sb.append(String.format("%-15s %-15.4f %-15.4f %-15.4f\n",
+            sb.append(String.format("%-15s %-15.4f %-15.4f %-15.4f %-15.4f\n",
                     v.name,
                     measures.get("Betweenness"),
                     measures.get("Closeness"),
-                    measures.get("Degree")));
+                    measures.get("Degree"),
+                    measures.get("Weighted Degree"))); // Add Weighted Degree
         }
 
         return sb.toString();

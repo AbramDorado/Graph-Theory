@@ -558,7 +558,7 @@ public class Canvas {
                     yPosition += 25; // Adjust position as needed
                     g.drawString("Centrality Measures:", 100, yPosition);
 
-                    String centralityTable = gP.printCentralityMeasures(vertexList);
+                    String centralityTable = gP.printCentralityMeasures(vertexList, edgeList);
                     String[] centralityLines = centralityTable.split("\n");
 
                     for (String line : centralityLines) {
